@@ -16,3 +16,28 @@
       status_code: [204,400]
     register: vault_auth_enable
     changed_when: vault_auth_enable.status == 204
+
+  - name: Configure JWT Auth
+    uri:
+      url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/auth/jwt/config"
+      headers:
+        X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
+      body_format: json
+      method: POST
+      body:
+        bound_issuer: "fake@docker-compose"
+        jwt_validation_pubkeys: "{{ lookup('file', 'jwk.pub.pem') }}"
+      status_code: [204]
+
+  - name: Create docker-compose Role
+    uri:
+      url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/auth/jwt/role/docker-compose"
+      headers:
+        X-Vault-Token: "{{ lookup('env', 'VAULT_TOKEN') }}"
+      body_format: json
+      method: POST
+      body:
+        role_type: jwt
+        bound_audiences: "http://vault:8200"
+        user_claim: jti
+      status_code: [200]
