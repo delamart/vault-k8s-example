@@ -4,6 +4,15 @@
   gather_facts: false
 
   tasks:
+  - name: Wait for vault to be ready
+    uri:
+      url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/sys/health"
+      method: HEAD
+    register: vault_health
+    until: vault_health.status == 200
+    retries: 60
+    delay: 1
+
   - name: Enable JWT Auth
     uri:
       url: "{{ lookup('env', 'VAULT_ADDR') }}/v1/sys/auth/jwt"
