@@ -1,0 +1,16 @@
+services:
+  ansible:
+    image: quay.io/ansible/ansible-runner:latest
+    environment:
+      - RUNNER_PLAYBOOK=run.yml
+      - VAULT_ADDR=http://vault:8200
+      - VAULT_TOKEN=root-token
+    volumes:
+      - ./ansible-runner/runner:/runner
+  vault:
+    image: vault
+    ports:
+      - "8200:8200"
+    environment:
+      - SKIP_SETCAP=false
+      - VAULT_DEV_ROOT_TOKEN_ID=root-token
