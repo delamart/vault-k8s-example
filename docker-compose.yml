@@ -7,6 +7,7 @@ services:
       - VAULT_TOKEN=root-token
     volumes:
       - ./ansible-runner/runner:/runner
+      - ./serviceaccount:/run/secrets/kubernetes.io/serviceaccount
   vault:
     image: vault
     ports:
@@ -14,3 +15,11 @@ services:
     environment:
       - SKIP_SETCAP=false
       - VAULT_DEV_ROOT_TOKEN_ID=root-token
+  vault-agent:
+    image: vault
+    environment:
+      - VAULT_ADDR=http://vault:8200
+    command: ['agent','-config=/tmp/config.hcl','-log-level=debug']
+    volumes:
+      - ./vault-agent/config.hcl:/tmp/config.hcl
+      - ./serviceaccount:/run/secrets/kubernetes.io/serviceaccount
